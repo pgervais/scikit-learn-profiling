@@ -59,7 +59,7 @@ def timeit(f):
     return timed
 
 
-def cache_array(value, filename, decimal=7):
+def cache_value(value, filename, decimal=7):
     """Helper function for checking that a value hasn't changed between
     two invocations.
 
