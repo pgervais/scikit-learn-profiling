@@ -6,7 +6,6 @@ import numpy as np
 import scipy.spatial.distance as ssd
 
 from sklearn.metrics import euclidean_distances
-from sklearn.metrics import euclidean_distances_argmin
 from sklearn.metrics import pairwise_distances
 from sklearn.metrics import pairwise_distances_argmin
 
@@ -28,35 +27,17 @@ def original(X, Y=None, axis=1, metric='euclidean', **kwargs):
 
 
 def chunked(X, Y=None, axis=1, metric="euclidean",
-            chunk_x_num=None, chunk_y_num=None, **kwargs):
+            n_batches_x=None, chunk_y_num=None, **kwargs):
     """Return argmin on the selected axis.
     axis 0 is along X
     axis 1 is along Y
     """
     out = pairwise_distances_argmin(X, Y=Y, axis=axis,
-                                    chunk_x_num=chunk_x_num,
+                                    n_batches_x=n_batches_x,
                                     chunk_y_num=chunk_y_num,
                                     metric=metric, return_distances=True,
                                     **kwargs)
     return out
-
-
-def compare_implementations(X, Y=None, axis=1,
-                            chunk_x_num=None, chunk_y_num=None):
-    """Return argmin on the selected axis.
-    axis 0 is along X
-    axis 1 is along Y
-    """
-    utils.timeit(euclidean_distances_argmin)(X, Y=Y, axis=axis,
-                                             chunk_x_num=chunk_x_num,
-                                             chunk_y_num=chunk_y_num,
-                                             squared=False,
-                                             return_distances=True)
-    utils.timeit(pairwise_distances_argmin)(X, Y=Y, axis=axis,
-                                            chunk_x_num=chunk_x_num,
-                                            chunk_y_num=chunk_y_num,
-                                            metric="euclidean",
-                                            return_distances=True)
 
 
 if __name__ == "__main__":
@@ -70,7 +51,7 @@ if __name__ == "__main__":
 #    x_size, y_size = 50, 20
 #    x_size, y_size = 500, 200
 #    x_size, y_size = 500, 2000
-    x_size, y_size = 5000, 2000
+#    x_size, y_size = 5000, 2000
     x_size, y_size = 2000, 5000
 
     n_var = 200
@@ -81,17 +62,14 @@ if __name__ == "__main__":
     X = np.random.rand(x_size, n_var)
     Y = np.random.rand(y_size, n_var)
     axis = 0
-    chunk_x_num = None
-    chunk_y_num = None
-    #    batch_size # mini batch kmean
+    n_batches_x = 50
+    n_batches_y = 50
 
-#    compare_implementations(X, Y, axis=axis)
-#    sys.exit(0)
     dist_orig_ind, dist_orig_val = utils.timeit(profile(original))(
         X, Y, metric=metric, axis=axis, **kwargs)
     dist_chunked_ind, dist_chunked_val = utils.timeit(profile(chunked))(
         X, Y, axis=axis, metric=metric,
-        chunk_x_num=chunk_x_num, chunk_y_num=chunk_y_num, **kwargs)
+        n_batches_x=n_batches_x, n_batches_y=n_batches_y, **kwargs)
 
     np.testing.assert_almost_equal(dist_orig_ind, dist_chunked_ind, decimal=7)
     np.testing.assert_almost_equal(dist_orig_val, dist_chunked_val, decimal=7)
