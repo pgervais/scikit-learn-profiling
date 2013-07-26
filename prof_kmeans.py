@@ -28,7 +28,7 @@ tol = 1e-4
 print("\n-- scipy.cluster.vq")
 ratio = 1.
 np.random.seed(1)
-sc, _ = utils.timeit(kmeans)(X, n_clusters, iter=2, thresh=tol / ratio)
+sc, _ = utils.timeit(profile(kmeans))(X, n_clusters, iter=2, thresh=tol / ratio)
 inertia1 = _labels_inertia(X, (X ** 2).sum(axis=-1), sc)[1]
 print('scipy inertia: %.1f' % inertia1)
 
@@ -40,7 +40,7 @@ print('scipy inertia: %.1f' % inertia1)
 print("\n-- sklearn.cluster")
 ratio = np.mean(np.var(X, axis=0))  # just to make the comparison fair.
 np.random.seed(1)
-sk, _, _ = utils.timeit(k_means)(X, n_clusters, n_init=2, tol=tol / ratio,
+sk, _, _ = utils.timeit(profile(k_means))(X, n_clusters, n_init=2, tol=tol / ratio,
                                  init="random", random_state=1)
 inertia2 = _labels_inertia(X, (X ** 2).sum(axis=-1), sk)[1]
 print('inertia: %.1f' % inertia2)
